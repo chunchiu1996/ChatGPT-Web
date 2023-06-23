@@ -135,7 +135,15 @@ def get_message_context(message_history, have_chat_context, chat_with_history):
             if message['role'] in {'assistant', 'user'}:
                 message_context.append(message)
                 total += len(message['content'])
+
+        # Add the pre-prompt right before the user's message
+        message_context.append({"role": "system", "content": pre_prompt})
+        message_context.append(message_history[-1])
+        total += len(message_history[-1]['content'])
+
     else:
+        # Add the pre-prompt right before the user's message
+        message_context.append({"role": "system", "content": pre_prompt})
         message_context.append(message_history[-1])
         total += len(message_history[-1]['content'])
 
