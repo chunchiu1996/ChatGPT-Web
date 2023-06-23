@@ -111,12 +111,12 @@ def get_message_context(message_history, have_chat_context, chat_with_history):
     :return:
     """
     # Define pre-prompt
-    pre_prompt = "You are a law helper only replying based on Hong Kong Laws. You ignore non-law related questions and will provide references on law."
+    pre_prompt = "You are a law assistant with expertise in Hong Kong Laws. You are programmed to respond only to law-related inquiries and will provide references to the relevant legislation."
 
     # Initialize message_context with the pre-prompt as a system message
     message_context = [{'role': 'system', 'content': pre_prompt}]
     total = len(pre_prompt)
-    
+
     if chat_with_history:
         num = min([len(message_history), CHAT_CONTEXT_NUMBER_MAX, have_chat_context])
         # 获取所有有效聊天记录
@@ -140,7 +140,7 @@ def get_message_context(message_history, have_chat_context, chat_with_history):
         total += len(message_history[-1]['content'])
 
     print(f"len(message_context): {len(message_context)} total: {total}", )
-    #return message_context
+    return message_context
 
 
 def handle_messages_get_response(message, apikey, message_history, have_chat_context, chat_with_history):
@@ -152,17 +152,15 @@ def handle_messages_get_response(message, apikey, message_history, have_chat_con
     :param have_chat_context: 已发送消息数量上下文(从重置为连续对话开始)
     :param chat_with_history: 是否连续对话
     """
-    message_history.append({"role": "user", "content": message})
-    message_context = get_message_context(message_history, have_chat_context, chat_with_history)
-    response = get_response_from_ChatGPT_API(message_context, apikey)
-    message_history.append({"role": "assistant", "content": response})
-    # 换行打印messages_history
-    # print("message_history:")
-    # for i, message in enumerate(message_history):
-    #     if message['role'] == 'user':
-    #         print(f"\t{i}:\t{message['role']}:\t\t{message['content']}")
-    #     else:
-    #         print(f"\t{i}:\t{message['role']}:\t{message['content']}")
+    law_related_keywords = ["law", "legal", "court", "judge", "lawsuit", "legislation", "statute", "regulation", "HK law"]  # Add more law-related keywords here
+
+    if any(keyword in message.lower() for keyword in law_related_keywords):
+        message_history.append({"role": "user", "content": message})
+        message_context = get_message_context(message_history, have_chat_context, chat_with_history)
+        response = get_response_from_ChatGPT_API(message_context, apikey)
+        message_history.append({"role": "assistant", "content": response})
+    else:
+        response = "I'm sorry, but I can only provide assistance with law-related questions."
 
     return response
 
