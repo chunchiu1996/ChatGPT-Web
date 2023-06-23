@@ -57,7 +57,7 @@ project_info = "## ChatGPT 网页版    \n" \
 
 
 def get_response_from_ChatGPT_API(message_context, apikey,
-                                  model="gpt-3.5-turbo", temperature=0.9, presence_penalty=0, max_tokens=2000):
+                                  model="gpt-3.5-turbo", temperature=0, presence_penalty=0, max_tokens=2000):
     """
     从ChatGPT API获取回复
     :param message_context: 上下文
@@ -110,8 +110,13 @@ def get_message_context(message_history, have_chat_context, chat_with_history):
     :param chat_with_history:
     :return:
     """
-    message_context = []
-    total = 0
+    # Define pre-prompt
+    pre_prompt = "You are a law helper only replying based on Hong Kong Laws. You ignore non-law related questions and will provide references on law."
+
+    # Initialize message_context with the pre-prompt as a system message
+    message_context = [{'role': 'system', 'content': pre_prompt}]
+    total = len(pre_prompt)
+    
     if chat_with_history:
         num = min([len(message_history), CHAT_CONTEXT_NUMBER_MAX, have_chat_context])
         # 获取所有有效聊天记录
@@ -135,7 +140,7 @@ def get_message_context(message_history, have_chat_context, chat_with_history):
         total += len(message_history[-1]['content'])
 
     print(f"len(message_context): {len(message_context)} total: {total}", )
-    return message_context
+    #return message_context
 
 
 def handle_messages_get_response(message, apikey, message_history, have_chat_context, chat_with_history):
